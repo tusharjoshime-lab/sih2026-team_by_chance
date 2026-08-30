@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { putJson } from "../utils/api";
 
 function Profile() {
   const navigate = useNavigate();
@@ -14,17 +13,6 @@ function Profile() {
     education: "",
     experience: "",
   });
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("skillsetuUser");
-    if (stored) {
-      try {
-        const u = JSON.parse(stored);
-        setProfile((p) => ({ ...p, ...u }));
-      } catch {}
-    }
-  }, []);
 
   const handleChange = (e) => {
     setProfile({
@@ -33,17 +21,12 @@ function Profile() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError(null);
-    try {
-      const result = await putJson("/profile", profile);
-      // update stored user
-      localStorage.setItem("skillsetuUser", JSON.stringify(result));
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.message || "Failed to update profile");
-    }
+
+    localStorage.setItem("skillsetuProfile", JSON.stringify(profile));
+
+    navigate("/dashboard");
   };
 
   return (
@@ -248,10 +231,6 @@ function Profile() {
             </button>
 
           </form>
-
-          {error && (
-            <p className="text-center text-sm text-red-600 mt-4">{error}</p>
-          )}
 
           {/* Footer */}
           <p className="text-center text-xs text-slate-400 mt-6">

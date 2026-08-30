@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+<<<<<<< HEAD
 import { useState } from "react";
 import { postJson } from "../utils/api";
 
@@ -21,6 +22,15 @@ function Signup() {
     } catch (err) {
       setError(err.message || "Signup failed");
     }
+=======
+
+function Signup() {
+  const navigate = useNavigate();
+
+  const handleSignup = (e) => {
+    e.preventDefault();
+    navigate("/profile");
+>>>>>>> f2a59c5 (Initial SkillSetu project)
   };
 
   return (
@@ -169,8 +179,11 @@ function Signup() {
 
                 <input
                   type="text"
+<<<<<<< HEAD
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+=======
+>>>>>>> f2a59c5 (Initial SkillSetu project)
                   placeholder="Enter your full name"
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   required
@@ -195,8 +208,11 @@ function Signup() {
 
                 <input
                   type="email"
+<<<<<<< HEAD
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+=======
+>>>>>>> f2a59c5 (Initial SkillSetu project)
                   placeholder="you@example.com"
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   required
@@ -221,8 +237,11 @@ function Signup() {
 
                 <input
                   type="password"
+<<<<<<< HEAD
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+=======
+>>>>>>> f2a59c5 (Initial SkillSetu project)
                   placeholder="Create a password"
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   required
@@ -263,10 +282,13 @@ function Signup() {
 
           </form>
 
+<<<<<<< HEAD
           {error && (
             <p className="text-center text-sm text-red-600 mt-4">{error}</p>
           )}
 
+=======
+>>>>>>> f2a59c5 (Initial SkillSetu project)
           {/* Divider */}
           <div className="flex items-center gap-4 my-7">
 

@@ -76,7 +76,7 @@ function Dashboard() {
               </div>
 
               <h2 className="text-3xl md:text-[2.75rem] leading-[1.1] font-bold tracking-tight">
-                Welcome back 
+                Welcome back
                 {profileData?.name
                   ? `, ${profileData.name}`
                   : ""}
