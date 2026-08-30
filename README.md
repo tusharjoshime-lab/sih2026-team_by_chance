@@ -1,1 +1,0 @@
-# sih2026-team_by_chance

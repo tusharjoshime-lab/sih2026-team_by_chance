@@ -10,7 +10,6 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 def _user_doc_to_out(doc: dict) -> UserOut:
-    """Convert a raw MongoDB document into the safe UserOut shape (never leaks passwordHash)."""
     return UserOut(
         id=str(doc["_id"]),
         name=doc.get("name"),
@@ -44,7 +43,6 @@ def register(payload: UserRegister):
     try:
         result = users_collection.insert_one(new_user)
     except DuplicateKeyError:
-        # The unique index on "email" (set up in database.py) rejected this insert.
         raise HTTPException(status_code=400, detail="An account with this email already exists")
 
     new_user["_id"] = result.inserted_id
@@ -56,8 +54,6 @@ def register(payload: UserRegister):
 def login(payload: UserLogin):
     user = users_collection.find_one({"email": payload.email.lower()})
 
-    # Deliberately vague error message (don't reveal whether it was the email
-    # or the password that was wrong -- that's a basic security practice).
     if not user or not verify_password(payload.password, user["passwordHash"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 

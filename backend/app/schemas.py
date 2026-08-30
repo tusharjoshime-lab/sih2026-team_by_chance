@@ -1,8 +1,5 @@
 """
-Pydantic models = the "shape" of data going IN and OUT of the API.
-FastAPI uses these to auto-validate requests and auto-generate the
-interactive docs at /docs. This is separate from the MongoDB documents
-in database.py (Mongo storage shape) but they mostly mirror each other.
+Pydantic models for request/response validation.
 """
 from typing import List, Optional, Dict
 from pydantic import BaseModel, EmailStr, Field
@@ -35,7 +32,6 @@ class UserLogin(BaseModel):
 
 
 class UserOut(BaseModel):
-    """What we send back to the frontend. Notice: no passwordHash field, ever."""
     id: str
     name: str
     email: EmailStr
