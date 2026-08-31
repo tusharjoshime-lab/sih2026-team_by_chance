@@ -1,43 +1,135 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
-async function request(path, opts = {}) {
-  const url = `${API_BASE}${path}`;
+export const API_BASE = API_BASE_URL;
 
-  const token = localStorage.getItem("skillsetuToken");
-  const headers = opts.headers || {};
-  if (!headers["Content-Type"] && opts.body) headers["Content-Type"] = "application/json";
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const res = await fetch(url, { ...opts, headers });
-
-  const text = await res.text();
-  let data;
+export const getStoredUser = () => {
   try {
-    data = text ? JSON.parse(text) : null;
-  } catch (e) {
-    data = text;
+    return JSON.parse(localStorage.getItem("skillsetuUser") || "null");
+  } catch {
+    return null;
+  }
+};
+
+export const saveAuthSession = (data) => {
+  if (!data) return null;
+
+  if (data.access_token) {
+    // Keep both keys for compatibility with the current Login.jsx
+    // and the API helper.
+    localStorage.setItem("skillsetuToken", data.access_token);
+    localStorage.setItem("access_token", data.access_token);
   }
 
-  if (!res.ok) {
-    const err = (data && data.detail) || data || res.statusText;
-    const e = new Error(err);
-    e.status = res.status;
-    throw e;
+  const user = data.user || getStoredUser();
+
+  if (user) {
+    localStorage.setItem("skillsetuUser", JSON.stringify(user));
+    localStorage.setItem("skillsetuProfile", JSON.stringify(user));
   }
 
-  return data;
-}
+  return user;
+};
 
-export function postJson(path, body) {
-  return request(path, { method: "POST", body: JSON.stringify(body) });
-}
+export const getAuthToken = () => {
+  return (
+    localStorage.getItem("skillsetuToken") ||
+    localStorage.getItem("access_token")
+  );
+};
 
-export function putJson(path, body) {
-  return request(path, { method: "PUT", body: JSON.stringify(body) });
-}
+export const getAuthHeaders = (extra = {}) => {
+  const token = getAuthToken();
 
-export function getJson(path) {
-  return request(path, { method: "GET" });
-}
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+};
 
-export default { API_BASE, request, postJson, putJson, getJson };
+export const apiRequest = async (endpoint, options = {}) => {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      ...getAuthHeaders(),
+      ...(options.headers || {}),
+    },
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+
+  const payload = contentType.includes("application/json")
+    ? await response.json().catch(() => null)
+    : await response.text().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.detail ||
+        payload?.message ||
+        payload ||
+        response.statusText ||
+        "Request failed"
+    );
+  }
+
+  return payload;
+};
+
+export const postJson = (path, body) => {
+  return apiRequest(path, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+};
+
+export const putJson = (path, body) => {
+  return apiRequest(path, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+};
+
+export const getJson = (path) => {
+  return apiRequest(path, {
+    method: "GET",
+  });
+};
+
+export const saveProfileToBackend = async (profilePayload) => {
+  const response = await apiRequest("/profile", {
+    method: "PUT",
+    body: JSON.stringify(profilePayload),
+  });
+
+  const savedProfile =
+    response?.profile || response?.user || response;
+
+  if (savedProfile) {
+    localStorage.setItem(
+      "skillsetuProfile",
+      JSON.stringify(savedProfile)
+    );
+
+    localStorage.setItem(
+      "skillsetuUser",
+      JSON.stringify(savedProfile)
+    );
+  }
+
+  return response;
+};
+
+export default {
+  API_BASE,
+  API_BASE_URL,
+  apiRequest,
+  getStoredUser,
+  saveAuthSession,
+  getAuthToken,
+  getAuthHeaders,
+  postJson,
+  putJson,
+  getJson,
+  saveProfileToBackend,
+};

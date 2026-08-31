@@ -1,18 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { apiRequest, getStoredUser, saveAuthSession } from "../utils/api";
 
 function Profile() {
   const navigate = useNavigate();
+  const user = getStoredUser();
+  const savedProfile = JSON.parse(
+    localStorage.getItem("skillsetuProfile") || "null"
+  );
 
   const [profile, setProfile] = useState({
-    name: "",
-    designation: "",
-    department: "",
-    jobRole: "",
-    education: "",
-    experience: "",
+    name: savedProfile?.name || user?.name || "",
+    designation: savedProfile?.designation || "",
+    department: savedProfile?.department || "",
+    jobRole: savedProfile?.jobRole || "",
+    education: savedProfile?.education || "",
+    experience: savedProfile?.experience || "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setProfile({
@@ -21,12 +29,36 @@ function Profile() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    localStorage.setItem("skillsetuProfile", JSON.stringify(profile));
+    setLoading(true);
+    setError("");
 
-    navigate("/dashboard");
+    try {
+      const payload = {
+        ...profile,
+        email: user?.email || getStoredUser()?.email || "",
+      };
+
+      const response = await apiRequest("/profile", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      const savedProfile = response.profile || response.user || response;
+      localStorage.setItem("skillsetuProfile", JSON.stringify(savedProfile));
+
+      if (response.user) {
+        saveAuthSession({ user: response.user });
+      }
+
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Profile could not be saved");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -78,6 +110,12 @@ function Profile() {
             </div>
 
           </div>
+
+          {error && (
+            <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+              {error}
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -211,21 +249,24 @@ function Profile() {
             {/* Button */}
             <button
               type="submit"
+              disabled={loading}
               className="group w-full bg-gradient-to-r from-blue-600 to-indigo-600
               text-white py-4 rounded-xl font-semibold
               shadow-lg shadow-blue-200
               hover:shadow-xl hover:shadow-blue-300
               hover:-translate-y-0.5
               active:translate-y-0
-              transition-all duration-300"
+              transition-all duration-300 disabled:opacity-50"
             >
 
               <span className="inline-flex items-center gap-2">
-                Continue to Dashboard
+                {loading ? "Saving profile..." : "Continue to Dashboard"}
 
-                <span className="group-hover:translate-x-1 transition-transform duration-300">
-                  →
-                </span>
+                {!loading && (
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">
+                    →
+                  </span>
+                )}
               </span>
 
             </button>
