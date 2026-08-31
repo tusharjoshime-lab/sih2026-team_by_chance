@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import auth
+from app.routes import auth, profile, competency
 
 app = FastAPI(title="SIH Capacity Building Platform API")
 
@@ -15,6 +15,8 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(profile.router)
+app.include_router(competency.router)
 
 
 @app.get("/")

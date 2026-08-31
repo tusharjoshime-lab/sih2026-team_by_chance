@@ -48,3 +48,15 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
+
+
+class ProfileUpdate(BaseModel):
+    """All fields optional -- only the ones the client sends get updated."""
+    name: Optional[str] = None
+    designation: Optional[str] = None
+    department: Optional[str] = None
+    jobRole: Optional[str] = None
+    education: Optional[str] = None
+    experience: Optional[List[ExperienceItem]] = None
+    previousTrainings: Optional[List[TrainingItem]] = None
+    competencyScores: Optional[Dict[str, float]] = None
