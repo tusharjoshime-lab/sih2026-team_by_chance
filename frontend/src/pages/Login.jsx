@@ -1,11 +1,24 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { postJson } from "../utils/api";
 
 function Login() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    navigate("/profile");
+    setError(null);
+    try {
+      const data = await postJson("/auth/login", { email, password });
+      localStorage.setItem("skillsetuToken", data.access_token);
+      localStorage.setItem("skillsetuUser", JSON.stringify(data.user));
+      navigate("/profile");
+    } catch (err) {
+      setError(err.message || "Login failed");
+    }
   };
 
   return (
@@ -138,6 +151,8 @@ function Login() {
 
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   required
@@ -173,6 +188,8 @@ function Login() {
 
                 <input
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                   required
@@ -209,6 +226,10 @@ function Login() {
             </button>
 
           </form>
+
+          {error && (
+            <p className="text-center text-sm text-red-600 mt-4">{error}</p>
+          )}
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-7">
