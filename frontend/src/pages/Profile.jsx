@@ -37,13 +37,28 @@ function Profile() {
 
     try {
       const payload = {
-        ...profile,
-        email: user?.email || getStoredUser()?.email || "",
-      };
+  name: profile.name,
+  designation: profile.designation,
+  department: profile.department,
+  jobRole: profile.jobRole,
+  education: profile.education,
+
+  experience: profile.experience
+    ? [
+        {
+          role: profile.jobRole || profile.designation || "Professional",
+          organization: "",
+          years: Number(
+            profile.experience.match(/\d+(\.\d+)?/)?.[0] || 0
+          ),
+        },
+      ]
+    : [],
+};
 
       const response = await apiRequest("/profile", {
-        method: "POST",
-        body: JSON.stringify(payload),
+    method: "PUT",
+    body: JSON.stringify(payload),
       });
 
       const savedProfile = response.profile || response.user || response;
@@ -55,8 +70,16 @@ function Profile() {
 
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message || "Profile could not be saved");
-    } finally {
+  console.error("PROFILE ERROR:", err);
+
+  if (typeof err === "string") {
+    setError(err);
+  } else if (err?.message) {
+    setError(err.message);
+  } else {
+    setError("Profile could not be saved. Please check your details.");
+  }
+} finally {
       setLoading(false);
     }
   };
