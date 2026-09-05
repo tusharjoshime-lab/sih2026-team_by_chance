@@ -1,138 +1,144 @@
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const navigate = useNavigate();
+
   const navItems = [
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-      icon: "▦",
-    },
-    {
-      name: "Courses & Quiz",
-      path: "/course-quiz",
-      icon: "◈",
-    },
-    {
-      name: "Profile",
-      path: "/profile",
-      icon: "○",
-    },
-    {
-      name: "Admin",
-      path: "/admin",
-      icon: "▣",
-    },
+    { name: "Dashboard", path: "/dashboard", icon: "▦" },
+    { name: "Skill Gaps", path: "/future-skills", icon: "◎" },
+    { name: "Courses", path: "/courses", icon: "🎓" },
+    { name: "PDF → AI Quiz", path: "/material-quiz", icon: "📄" },
+    { name: "Progress", path: "/progress", icon: "↗" },
   ];
 
+  const streak = Number(
+    localStorage.getItem("skillsetuStreak") || 7
+  );
+
+  const handleLogout = () => {
+  localStorage.removeItem("skillsetuToken");
+  localStorage.removeItem("skillsetuProfile");
+  localStorage.removeItem("skillsetuGovernmentProfile");
+  localStorage.removeItem("skillsetuAssessment");
+  localStorage.removeItem("skillsetuQuizResult");
+  localStorage.removeItem("skillsetuFutureSkills");
+
+  navigate("/");
+};
   return (
-    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-200">
+    <nav className="sticky top-0 z-50 border-b border-orange-100 bg-[#fffdf9]/95 backdrop-blur-xl">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="h-20 flex items-center justify-between">
+        <div className="flex min-h-20 items-center justify-between gap-4 py-3">
 
-          {/* Brand */}
+          {/* LOGO */}
           <Link
             to="/dashboard"
-            className="flex items-center gap-3 group"
+            className="group flex shrink-0 items-center gap-3"
           >
-
-            {/* Logo */}
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600
-                            flex items-center justify-center shadow-lg shadow-blue-200
-                            group-hover:scale-105 transition-transform duration-300">
-
-              <span className="text-white font-bold text-xl">
-                S
-              </span>
-
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-orange-600 to-amber-500 text-xl font-black text-white shadow-lg shadow-orange-200 transition-transform group-hover:scale-105">
+              S
             </div>
 
-            {/* Brand Text */}
             <div className="leading-tight">
-              <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
-                Skill<span className="text-blue-600">Setu</span>
+              <h1 className="text-xl font-extrabold tracking-tight text-stone-900">
+                Skill
+                <span className="text-orange-600">
+                  Setu
+                </span>
               </h1>
 
-              <p className="text-[10px] font-medium text-slate-400 tracking-wide">
-                AI SKILL INTELLIGENCE
+              <p className="text-[10px] font-semibold tracking-wide text-stone-400">
+                GOVERNMENT CAPACITY BUILDING
               </p>
             </div>
-
           </Link>
 
+          {/* DESKTOP NAV */}
+          <div className="hidden flex-1 items-center justify-center gap-2 lg:flex">
 
-          {/* Navigation */}
-          <div className="hidden md:flex items-center bg-slate-100/80 rounded-xl p-1.5 gap-1">
-
-            {navItems.map((item) => (
-
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `relative flex items-center gap-2 px-4 py-2.5 rounded-lg
-                  text-sm font-semibold transition-all duration-200
-                  ${
-                    isActive
-                      ? "bg-white text-blue-600 shadow-sm"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-white/60"
-                  }`
-                }
-              >
-
-                <span className="text-base">
-                  {item.icon}
-                </span>
-
-                {item.name}
-
-              </NavLink>
-
-            ))}
-
-          </div>
-
-
-          {/* Right Side */}
-          <div className="flex items-center gap-3">
-
-            {/* AI Status */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-lg
-                            bg-blue-50 border border-blue-100">
-
-              <span className="relative flex h-2.5 w-2.5">
-
-                <span className="animate-ping absolute inline-flex h-full w-full
-                                 rounded-full bg-blue-400 opacity-75">
-                </span>
-
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600">
-                </span>
-
-              </span>
-
-              <span className="text-xs font-semibold text-blue-700">
-                AI Active
-              </span>
-
-            </div>
-
-
-            {/* User Avatar */}
+            {/* STREAK */}
             <Link
-              to="/profile"
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-800 to-slate-600
-                         flex items-center justify-center text-white font-bold text-sm
-                         shadow-sm hover:scale-105 transition-transform duration-200"
+              to="/progress"
+              className="mr-2 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-bold text-amber-800 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
-              U
+              🔥 {streak} Day Streak
             </Link>
 
+            {/* NAV ITEMS */}
+            <div className="flex items-center gap-1 rounded-xl bg-orange-50 p-1.5">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-semibold transition-all ${
+                      isActive
+                        ? "bg-white text-orange-700 shadow-sm"
+                        : "text-stone-500 hover:bg-white hover:text-stone-900"
+                    }`
+                  }
+                >
+                  <span>{item.icon}</span>
+                  {item.name}
+                </NavLink>
+              ))}
+            </div>
           </div>
 
-        </div>
-      </div>
+          {/* RIGHT SIDE */}
+          <div className="flex items-center gap-2">
 
+            {/* MOBILE STREAK */}
+            <Link
+              to="/progress"
+              className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800 lg:hidden"
+            >
+              🔥 {streak}
+            </Link>
+
+            {/* MOBILE PDF QUIZ */}
+            <Link
+              to="/material-quiz"
+              className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-bold text-orange-700 lg:hidden"
+            >
+              📄 AI Quiz
+            </Link>
+
+            {/* LOGOUT */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm font-bold text-red-600 transition-all hover:bg-red-100 hover:text-red-700"
+            >
+              <span>↪</span>
+              <span className="hidden sm:inline">
+                Logout
+              </span>
+            </button>
+
+          </div>
+        </div>
+
+        {/* MOBILE NAV */}
+        <div className="flex gap-2 overflow-x-auto pb-3 lg:hidden">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold ${
+                  isActive
+                    ? "bg-orange-600 text-white"
+                    : "bg-orange-50 text-stone-600"
+                }`
+              }
+            >
+              {item.icon} {item.name}
+            </NavLink>
+          ))}
+        </div>
+
+      </div>
     </nav>
   );
 }

@@ -58,7 +58,7 @@ function Login() {
       );
 
       // Login successful
-      navigate("/dashboard");
+      navigate("/assessment");
 
     } catch (err) {
       setError(err.message);
@@ -68,16 +68,16 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-10 relative overflow-hidden">
+    <div className="min-h-screen bg-[#fffaf3] flex items-center justify-center px-4 py-10 relative overflow-hidden">
 
       {/* Background */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-orange-600/20 rounded-full blur-3xl" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
 
       <div className="relative w-full max-w-5xl grid md:grid-cols-2 bg-white rounded-3xl overflow-hidden shadow-2xl">
 
         {/* LEFT */}
-        <div className="hidden md:flex bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-10 text-white flex-col justify-between relative overflow-hidden">
+        <div className="hidden md:flex bg-gradient-to-br from-orange-600 via-orange-700 to-amber-700 p-10 text-stone-900 flex-col justify-between relative overflow-hidden">
 
           <div className="absolute -top-20 -right-20 w-56 h-56 border border-white/10 rounded-full" />
           <div className="absolute bottom-10 -left-24 w-64 h-64 border border-white/10 rounded-full" />
@@ -95,27 +95,27 @@ function Login() {
                   SkillSetu
                 </h1>
 
-                <p className="text-xs text-blue-100">
-                  Skill Intelligence Platform
+                <p className="text-xs text-orange-100">
+                  Government Skill Intelligence Platform
                 </p>
               </div>
 
             </div>
 
             <h2 className="text-4xl font-bold leading-tight">
-              Build the skills
+              Build public-service
               <br />
-              that move you
+              capabilities for
               <br />
-              <span className="text-blue-200">
-                forward.
+              <span className="text-orange-200">
+                better governance.
               </span>
             </h2>
 
-            <p className="text-blue-100 mt-6 leading-relaxed max-w-sm">
-              Discover your competency gaps, get AI-powered
-              learning recommendations and grow your
-              professional skills.
+            <p className="text-orange-100 mt-6 leading-relaxed max-w-sm">
+              Assess government-role competencies, identify gaps,
+              receive iGOT-aligned learning recommendations and
+              track continuous capacity building.
             </p>
 
           </div>
@@ -126,22 +126,22 @@ function Login() {
 
               <div className="flex -space-x-2">
 
-                <div className="w-8 h-8 rounded-full bg-blue-200 border-2 border-blue-700" />
+                <div className="w-8 h-8 rounded-full bg-orange-200 border-2 border-orange-700" />
 
-                <div className="w-8 h-8 rounded-full bg-indigo-200 border-2 border-blue-700" />
+                <div className="w-8 h-8 rounded-full bg-amber-200 border-2 border-orange-700" />
 
-                <div className="w-8 h-8 rounded-full bg-white border-2 border-blue-700" />
+                <div className="w-8 h-8 rounded-full bg-white border-2 border-orange-700" />
 
               </div>
 
-              <span className="text-sm text-blue-100">
+              <span className="text-sm text-orange-100">
                 Empowering continuous learning
               </span>
 
             </div>
 
-            <p className="text-xs text-blue-200">
-              AI-powered • Personalized • Skill-focused
+            <p className="text-xs text-orange-200">
+              Government-focused • Personalized • AI-assisted
             </p>
 
           </div>
@@ -154,7 +154,7 @@ function Login() {
           {/* Mobile logo */}
           <div className="md:hidden text-center mb-8">
 
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 rounded-2xl text-2xl shadow-lg">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-orange-600 rounded-2xl text-2xl shadow-lg">
               🧠
             </div>
 
@@ -162,8 +162,8 @@ function Login() {
               SkillSetu
             </h1>
 
-            <p className="text-sm text-slate-500 mt-1">
-              AI-Powered Skill Intelligence Platform
+            <p className="text-sm text-stone-500 mt-1">
+              AI-Powered Government Skill Intelligence Platform
             </p>
 
           </div>
@@ -171,7 +171,7 @@ function Login() {
           {/* Heading */}
           <div className="mb-8">
 
-            <p className="text-sm font-semibold text-blue-600 mb-2">
+            <p className="text-sm font-semibold text-orange-600 mb-2">
               WELCOME BACK
             </p>
 
@@ -179,8 +179,8 @@ function Login() {
               Sign in to your account
             </h2>
 
-            <p className="text-slate-500 mt-2">
-              Continue your personalized learning journey.
+            <p className="text-stone-500 mt-2">
+              Continue your public-service learning journey.
             </p>
 
           </div>
@@ -207,7 +207,7 @@ function Login() {
 
               <div className="relative">
 
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500">
                   ✉
                 </span>
 
@@ -216,7 +216,7 @@ function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none transition-all duration-200 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10"
                   required
                 />
 
@@ -235,7 +235,7 @@ function Login() {
 
                 <button
                   type="button"
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+                  className="text-xs font-semibold text-orange-600 hover:text-orange-700"
                 >
                   Forgot password?
                 </button>
@@ -244,7 +244,7 @@ function Login() {
 
               <div className="relative">
 
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500">
                   🔒
                 </span>
 
@@ -253,7 +253,7 @@ function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none transition-all duration-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none transition-all duration-200 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10"
                   required
                 />
 
@@ -267,12 +267,12 @@ function Login() {
               <input
                 type="checkbox"
                 id="remember"
-                className="w-4 h-4 accent-blue-600"
+                className="w-4 h-4 accent-orange-600"
               />
 
               <label
                 htmlFor="remember"
-                className="text-sm text-slate-500"
+                className="text-sm text-stone-500"
               >
                 Remember me
               </label>
@@ -283,7 +283,7 @@ function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3.5 rounded-xl font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              className="w-full bg-orange-600 text-stone-900 py-3.5 rounded-xl font-semibold shadow-lg shadow-orange-600/20 hover:bg-orange-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
 
               {loading
@@ -299,7 +299,7 @@ function Login() {
 
             <div className="h-px bg-slate-200 flex-1" />
 
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-stone-500">
               OR
             </span>
 
@@ -308,20 +308,20 @@ function Login() {
           </div>
 
           {/* SIGNUP */}
-          <p className="text-center text-sm text-slate-500">
+          <p className="text-center text-sm text-stone-500">
 
             Don't have an account?{" "}
 
             <Link
               to="/signup"
-              className="text-blue-600 font-bold hover:text-blue-700 hover:underline"
+              className="text-orange-600 font-bold hover:text-orange-700 hover:underline"
             >
               Create Account
             </Link>
 
           </p>
 
-          <p className="text-center text-xs text-slate-400 mt-8">
+          <p className="text-center text-xs text-stone-500 mt-8">
             © 2026 SkillSetu • AI-Powered Learning
           </p>
 
