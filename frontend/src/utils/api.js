@@ -1,10 +1,8 @@
-const API_BASE_URL =
-  (typeof window !== "undefined" && window.__API_BASE_URL) ||
-  import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 if (!API_BASE_URL) {
   console.error(
-    "API base URL is not configured. Set `VITE_API_BASE_URL` at build time or `window.__API_BASE_URL` at runtime."
+    "API base URL is not configured. Set `VITE_API_BASE_URL` at build time to your Render backend URL."
   );
   throw new Error("API base URL is not configured");
 }
