@@ -19,6 +19,8 @@ app.include_router(profile.router)
 app.include_router(competency.router)
 app.include_router(recommendations.router)
 app.include_router(quiz.router)
+app.include_router(recommendations.router)
+app.include_router(quiz.router)
 app.include_router(dashboard.router)
 app.include_router(chatbot.router)
 
