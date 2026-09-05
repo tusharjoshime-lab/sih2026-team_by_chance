@@ -20,11 +20,11 @@ export default function Progress() {
     async function fetchData() {
       try {
         const res = await getJson('/dashboard/employee');
-        if (res.quizHistory && res.quizHistory.length > 0) {
+        if (res.quizHistory && Array.isArray(res.quizHistory) && res.quizHistory.length > 0) {
           const recent = res.quizHistory[0];
           setResult({ score: recent.score, total: recent.totalQuestions || 5 });
           setHistory(res.quizHistory);
-        } else if (res.recentAttempts && res.recentAttempts.length > 0) {
+        } else if (res.recentAttempts && Array.isArray(res.recentAttempts) && res.recentAttempts.length > 0) {
           const recent = res.recentAttempts[0];
           setResult({ score: recent.score, total: recent.totalQuestions || 5 });
           setHistory(res.recentAttempts);
@@ -34,7 +34,7 @@ export default function Progress() {
           setAvg(res.averageScore);
         }
 
-        if (res.competencyGaps && res.competencyGaps.skillGaps) {
+        if (res.competencyGaps && Array.isArray(res.competencyGaps.skillGaps)) {
           setSkills(res.competencyGaps.skillGaps.map(g => [g.skill, g.currentLevel]));
         }
       } catch (err) {

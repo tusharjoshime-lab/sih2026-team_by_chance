@@ -46,7 +46,7 @@ function Recommendations(){
         setError(true);
         try {
           const gaps=JSON.parse(localStorage.getItem("skillsetuFutureGaps")||"[]"); 
-          if(gaps.length) {
+          if(Array.isArray(gaps) && gaps.length) {
             setRecommendations(gaps.map(g=>({competency:g.name,current:g.current,gap:g.gap,...mapTitle(g.name)})).sort((a,b)=>b.gap-a.gap));
           } else {
             setRecommendations(fallback);

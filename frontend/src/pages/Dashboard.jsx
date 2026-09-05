@@ -19,7 +19,7 @@ function Dashboard(){
         setProfile(mergedProfile);
 
         let mappedGaps = [];
-        if (res.competencyGaps && res.competencyGaps.skillGaps) {
+        if (res.competencyGaps && Array.isArray(res.competencyGaps.skillGaps)) {
           mappedGaps = res.competencyGaps.skillGaps.map(g => ({
             name: g.skill,
             current: g.currentLevel,
@@ -27,16 +27,16 @@ function Dashboard(){
             gap: g.gap
           }));
         } else {
-          try{mappedGaps=JSON.parse(localStorage.getItem("skillsetuFutureGaps")||"[]")}catch{}
+          try{mappedGaps=JSON.parse(localStorage.getItem("skillsetuFutureGaps")||"[]"); if(!Array.isArray(mappedGaps)) mappedGaps = [];}catch{ mappedGaps = []; }
           if(!mappedGaps.length) mappedGaps=[{name:"Digital Governance & e-Office",current:48,future:82,gap:34},{name:"Data-Driven Decision Making",current:42,future:78,gap:36},{name:"Citizen-Centric Service Delivery",current:58,future:85,gap:27},{name:"Cyber Security Awareness",current:45,future:80,gap:35}];
         }
         setGaps(mappedGaps);
-        setAvg(res.averageScore !== undefined ? res.averageScore : Math.round(mappedGaps.reduce((s,g)=>s+(g.current||0),0)/mappedGaps.length));
+        setAvg(res.averageScore !== undefined ? res.averageScore : (mappedGaps.length ? Math.round(mappedGaps.reduce((s,g)=>s+(g.current||0),0)/mappedGaps.length) : 0));
 
-        if (res.quizHistory && res.quizHistory.length > 0) {
+        if (res.quizHistory && Array.isArray(res.quizHistory) && res.quizHistory.length > 0) {
           const recent = res.quizHistory[0];
           setQuiz({ score: recent.score, total: recent.totalQuestions || 5 });
-        } else if (res.recentAttempts && res.recentAttempts.length > 0) {
+        } else if (res.recentAttempts && Array.isArray(res.recentAttempts) && res.recentAttempts.length > 0) {
           const recent = res.recentAttempts[0];
           setQuiz({ score: recent.score, total: recent.totalQuestions || 5 });
         } else {
@@ -47,12 +47,12 @@ function Dashboard(){
         console.error("Dashboard fetch failed, using fallback", err);
         const localProfile = JSON.parse(localStorage.getItem("skillsetuCareerProfile")||localStorage.getItem("skillsetuProfile")||"{}");
         setProfile(localProfile);
-        let localGaps=[]; try{localGaps=JSON.parse(localStorage.getItem("skillsetuFutureGaps")||"[]")}catch{}
+        let localGaps=[]; try{localGaps=JSON.parse(localStorage.getItem("skillsetuFutureGaps")||"[]"); if(!Array.isArray(localGaps)) localGaps = [];}catch{ localGaps = []; }
         if(!localGaps.length) localGaps=[{name:"Digital Governance & e-Office",current:48,future:82,gap:34},{name:"Data-Driven Decision Making",current:42,future:78,gap:36},{name:"Citizen-Centric Service Delivery",current:58,future:85,gap:27},{name:"Cyber Security Awareness",current:45,future:80,gap:35}];
         setGaps(localGaps);
         let q={score:0,total:0}; try{q=JSON.parse(localStorage.getItem("skillsetuQuizResult")||"{}")||q}catch{}
         setQuiz(q);
-        setAvg(Math.round(localGaps.reduce((s,g)=>s+(g.current||0),0)/localGaps.length));
+        setAvg(localGaps.length ? Math.round(localGaps.reduce((s,g)=>s+(g.current||0),0)/localGaps.length) : 0);
       } finally {
         setLoading(false);
       }

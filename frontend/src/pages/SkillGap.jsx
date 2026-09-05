@@ -54,7 +54,7 @@ function SkillGap() {
       });
 
       setSkills(rows);
-      setReadiness(Math.round(rows.reduce((sum, row) => sum + row.current, 0) / rows.length));
+      setReadiness(rows.length ? Math.round(rows.reduce((sum, row) => sum + row.current, 0) / rows.length) : 0);
       setLoading(false);
     }
     fetchData();
