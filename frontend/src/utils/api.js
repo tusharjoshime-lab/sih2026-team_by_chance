@@ -1,5 +1,13 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+  (typeof window !== "undefined" && window.__API_BASE_URL) ||
+  import.meta.env.VITE_API_BASE_URL;
+
+if (!API_BASE_URL) {
+  console.error(
+    "API base URL is not configured. Set `VITE_API_BASE_URL` at build time or `window.__API_BASE_URL` at runtime."
+  );
+  throw new Error("API base URL is not configured");
+}
 
 export const API_BASE = API_BASE_URL;
 
