@@ -1,4 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { getJson } from "../utils/api";
 import Navbar from "../components/Navbar";
 
 const baseSkills = [
@@ -12,9 +14,36 @@ const baseSkills = [
 function FutureSkills() {
   const navigate = useNavigate();
   const profile = JSON.parse(localStorage.getItem("skillsetuCareerProfile") || "{}");
-  const existing = profile.previousSkills || [];
-  const skills = baseSkills.map((skill) => ({ ...skill, current: existing.some((s)=>s.toLowerCase().includes(skill.name.split(" ")[0].toLowerCase())) ? Math.min(skill.current + 15, 75) : skill.current }));
-  const gaps = skills.map((s)=>({ ...s, gap: Math.max(s.future-s.current,0) }));
+  const [gaps, setGaps] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchGaps() {
+      try {
+        const data = await getJson('/competency/gaps');
+        if (data && data.skillGaps) {
+          const mappedGaps = data.skillGaps.map(g => ({
+            name: g.skill,
+            current: g.currentLevel,
+            future: g.requiredLevel,
+            gap: g.gap,
+            reason: `Required level ${g.requiredLevel} for your role`
+          }));
+          setGaps(mappedGaps);
+          setLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.error("API failed, falling back to local storage", err);
+      }
+
+      const existing = profile.previousSkills || [];
+      const skills = baseSkills.map((skill) => ({ ...skill, current: existing.some((s)=>s.toLowerCase().includes(skill.name.split(" ")[0].toLowerCase())) ? Math.min(skill.current + 15, 75) : skill.current }));
+      setGaps(skills.map((s)=>({ ...s, gap: Math.max(s.future-s.current,0) })));
+      setLoading(false);
+    }
+    fetchGaps();
+  }, []);
 
   const continueFlow = () => {
     const assessment = {};
@@ -25,6 +54,9 @@ function FutureSkills() {
 
   return <div className="min-h-screen bg-[#fffaf3] text-stone-900"><Navbar />
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      {loading && <div className="text-center py-10">Loading...</div>}
+      {!loading && (
+        <>
       <section className="overflow-hidden rounded-[30px] bg-gradient-to-br from-orange-700 via-orange-600 to-amber-500 p-7 text-white shadow-xl shadow-orange-100 sm:p-9">
         <p className="text-xs font-black tracking-[.18em] text-orange-100">FUTURE-ROLE COMPETENCY ANALYSIS</p>
         <h1 className="mt-3 text-3xl font-black sm:text-4xl">Skills you may need for your next level of responsibility</h1>
@@ -40,6 +72,8 @@ function FutureSkills() {
       </section>
 
       <div className="mt-8 flex flex-wrap justify-between gap-3"><Link to="/profile" className="rounded-xl border border-stone-200 bg-white px-5 py-3 font-bold text-stone-600">Edit profile</Link><button onClick={continueFlow} className="rounded-xl bg-orange-600 px-6 py-3 font-bold text-white shadow-lg shadow-orange-200 hover:bg-orange-700">See recommended iGOT learning →</button></div>
+        </>
+      )}
     </main>
   </div>;
 }

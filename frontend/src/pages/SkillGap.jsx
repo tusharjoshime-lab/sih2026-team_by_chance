@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getJson } from "../utils/api";
 import Navbar from "../components/Navbar";
 
 const requiredCompetencies = [
@@ -14,25 +15,49 @@ function SkillGap() {
   const navigate = useNavigate();
   const [skills, setSkills] = useState([]);
   const [readiness, setReadiness] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let assessment = {};
-    try {
-      assessment = JSON.parse(localStorage.getItem("skillsetuAssessment") || "{}");
-    } catch {
-      assessment = {};
+    async function fetchData() {
+      try {
+        const data = await getJson('/competency/gaps');
+        if (data && data.skillGaps) {
+          const mappedGaps = data.skillGaps.map(g => ({
+            name: g.skill,
+            current: g.currentLevel,
+            required: g.requiredLevel,
+            gap: g.gap,
+            status: g.status
+          }));
+          setSkills(mappedGaps);
+          setReadiness(data.overallReadinessPercent || 0);
+          setLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.error("API failed, falling back", err);
+      }
+
+      let assessment = {};
+      try {
+        assessment = JSON.parse(localStorage.getItem("skillsetuAssessment") || "{}");
+      } catch {
+        assessment = {};
+      }
+
+      const rows = requiredCompetencies.map((item) => {
+        const current = Number(assessment[item.name] ?? 0);
+        const safeCurrent = Number.isFinite(current) ? current : 0;
+        const gap = Math.max(item.required - safeCurrent, 0);
+        const status = gap === 0 ? "Ready" : gap <= 20 ? "Minor Gap" : gap <= 40 ? "Moderate Gap" : "Priority Gap";
+        return { ...item, current: safeCurrent, gap, status };
+      });
+
+      setSkills(rows);
+      setReadiness(Math.round(rows.reduce((sum, row) => sum + row.current, 0) / rows.length));
+      setLoading(false);
     }
-
-    const rows = requiredCompetencies.map((item) => {
-      const current = Number(assessment[item.name] ?? 0);
-      const safeCurrent = Number.isFinite(current) ? current : 0;
-      const gap = Math.max(item.required - safeCurrent, 0);
-      const status = gap === 0 ? "Ready" : gap <= 20 ? "Minor Gap" : gap <= 40 ? "Moderate Gap" : "Priority Gap";
-      return { ...item, current: safeCurrent, gap, status };
-    });
-
-    setSkills(rows);
-    setReadiness(Math.round(rows.reduce((sum, row) => sum + row.current, 0) / rows.length));
+    fetchData();
   }, []);
 
   const priority = [...skills].filter((s) => s.gap > 0).sort((a, b) => b.gap - a.gap).slice(0, 3);
@@ -47,6 +72,9 @@ function SkillGap() {
     <div className="min-h-screen bg-[#fffaf3] text-stone-900">
       <Navbar />
       <main className="mx-auto max-w-6xl px-6 py-10">
+        {loading && <div className="text-center py-10">Loading...</div>}
+        {!loading && (
+          <>
         <div className="mb-9">
           <p className="font-semibold text-orange-500">Competency Gap Analysis</p>
           <h1 className="mt-2 text-4xl font-bold">Government Role Readiness</h1>
@@ -86,6 +114,8 @@ function SkillGap() {
           </div>
           <button onClick={() => navigate("/recommendations")} className="mt-7 rounded-xl bg-orange-500 px-6 py-3 font-bold text-slate-950 hover:bg-orange-400">Get Personalized Learning Plan →</button>
         </div>
+          </>
+        )}
       </main>
     </div>
   );

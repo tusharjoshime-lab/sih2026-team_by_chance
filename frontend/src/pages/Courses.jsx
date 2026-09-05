@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { getJson } from '../utils/api';
 
 export const governmentCourses=[
 {id:"igot-public-service",title:"Effective Public Service Delivery",provider:"iGOT Karmayogi",category:"Citizen-Centric Governance",level:"Intermediate",duration:"6 hours",icon:"🤝",description:"Improve grievance handling, service standards, citizen communication and outcome-focused delivery.",skills:["Citizen service","Grievance redressal","Service standards"]},
@@ -10,9 +12,96 @@ export const governmentCourses=[
 {id:"igot-leadership",title:"Leadership & Capacity Building",provider:"iGOT Karmayogi",category:"Leadership",level:"Intermediate",duration:"6 hours",icon:"🧭",description:"Develop team coordination, goal setting, feedback and institutional capacity-building practices.",skills:["Leadership","Team coordination","Performance feedback"]},
 ];
 
-function Courses(){const [p]=useSearchParams(); const nav=useNavigate(); const id=p.get("course"); const visible=id?governmentCourses.filter(c=>c.id===id):governmentCourses; return <div className="min-h-screen bg-[#fffaf3] text-stone-900"><Navbar/><main className="mx-auto max-w-6xl px-4 py-9 sm:px-6">
-  <div className="mb-8"><p className="font-bold text-orange-600">Government Learning Catalogue</p><h1 className="mt-2 text-4xl font-black">{id?"Recommended iGOT learning":"Capacity-building courses"}</h1><p className="mt-3 max-w-3xl text-stone-500">SkillSetu recommends learning mapped to iGOT Karmayogi. Course completion remains on the authorised government learning platform; this demo shows the recommendation and hand-off flow.</p></div>
-  <div className="grid gap-5 md:grid-cols-2">{visible.map(c=><article key={c.id} className="rounded-2xl border border-orange-100 bg-white p-6 shadow-sm"><div className="flex gap-4"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-3xl">{c.icon}</div><div><span className="text-xs font-black uppercase tracking-wider text-orange-600">{c.provider}</span><h2 className="mt-1 text-xl font-bold">{c.title}</h2><p className="mt-1 text-sm text-stone-500">{c.category}</p></div></div><p className="mt-5 text-sm leading-6 text-stone-500">{c.description}</p><div className="mt-4 flex flex-wrap gap-2">{c.skills.map(s=><span key={s} className="rounded-lg bg-orange-50 px-3 py-1.5 text-xs text-stone-600">{s}</span>)}</div><div className="mt-5 flex items-center justify-between text-sm text-stone-500"><span>{c.level}</span><span>⏱ {c.duration}</span></div><div className="mt-6 grid gap-3 sm:grid-cols-2"><button onClick={()=>nav(`/course-quiz?course=${c.id}`)} className="rounded-xl border border-orange-200 bg-orange-50 px-5 py-3 font-bold text-orange-800 hover:bg-orange-100">Preview & Knowledge Check</button><button onClick={()=>nav(`/karmayogi?course=${c.id}`)} className="rounded-xl bg-orange-600 px-5 py-3 font-bold text-white hover:bg-orange-700">Continue on iGOT →</button></div></article>)}</div>
-  {id&&<button onClick={()=>nav('/courses')} className="mt-6 rounded-xl border border-stone-200 bg-white px-5 py-3 text-sm font-semibold text-stone-600">← View all courses</button>}
-</main></div>}
+function Courses(){
+  const [p]=useSearchParams(); 
+  const nav=useNavigate(); 
+  const id=p.get("course"); 
+  
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    getJson('/courses')
+      .then(data => {
+        if (data && data.courses) {
+          setCourses(data.courses.map(c => ({
+            id: c.id,
+            title: c.title,
+            provider: "SkillSetu Catalogue",
+            category: c.domain,
+            level: c.level,
+            duration: c.durationHrs ? `${c.durationHrs} hours` : 'N/A',
+            icon: "📚",
+            description: c.description,
+            skills: c.skillTags || []
+          })));
+        } else {
+          throw new Error("Invalid response");
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("API error:", err);
+        setError(true);
+        setCourses(governmentCourses);
+        setLoading(false);
+      });
+  }, []);
+
+  const visible=id?courses.filter(c=>c.id===id):courses; 
+  
+  return <div className="min-h-screen bg-[#fffaf3] text-stone-900"><Navbar/><main className="mx-auto max-w-6xl px-4 py-9 sm:px-6">
+    <div className="mb-8">
+      <p className="font-bold text-orange-600">Government Learning Catalogue</p>
+      <h1 className="mt-2 text-4xl font-black">{id?"Recommended iGOT learning":"Capacity-building courses"}</h1>
+      <p className="mt-3 max-w-3xl text-stone-500">SkillSetu recommends learning mapped to iGOT Karmayogi. Course completion remains on the authorised government learning platform; this demo shows the recommendation and hand-off flow.</p>
+    </div>
+
+    {loading && (
+      <div className="flex flex-col items-center justify-center py-12">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-orange-600"></div>
+        <p className="mt-4 font-medium text-stone-600">Loading learning catalogue...</p>
+      </div>
+    )}
+
+    {!loading && error && (
+      <div className="mb-6 rounded-xl bg-orange-50 p-4 text-sm text-orange-800">
+        Note: Could not load live catalogue from server. Showing default courses.
+      </div>
+    )}
+
+    {!loading && (
+      <div className="grid gap-5 md:grid-cols-2">
+        {visible.map(c=>
+          <article key={c.id} className="rounded-2xl border border-orange-100 bg-white p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-3xl">{c.icon}</div>
+                <div>
+                  <span className="text-xs font-black uppercase tracking-wider text-orange-600">{c.provider}</span>
+                  <h2 className="mt-1 text-xl font-bold">{c.title}</h2>
+                  <p className="mt-1 text-sm text-stone-500">{c.category}</p>
+                </div>
+              </div>
+              <p className="mt-5 text-sm leading-6 text-stone-500">{c.description}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {c.skills.map(s=><span key={s} className="rounded-lg bg-orange-50 px-3 py-1.5 text-xs text-stone-600">{s}</span>)}
+              </div>
+              <div className="mt-5 flex items-center justify-between text-sm text-stone-500">
+                <span>{c.level}</span>
+                <span>⏱ {c.duration}</span>
+              </div>
+            </div>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <button onClick={()=>nav(`/course-quiz?course=${c.id}`)} className="rounded-xl border border-orange-200 bg-orange-50 px-5 py-3 font-bold text-orange-800 hover:bg-orange-100">Preview & Knowledge Check</button>
+              <button onClick={()=>nav(`/karmayogi?course=${c.id}`)} className="rounded-xl bg-orange-600 px-5 py-3 font-bold text-white hover:bg-orange-700">Continue on iGOT →</button>
+            </div>
+          </article>
+        )}
+      </div>
+    )}
+    {id&&<button onClick={()=>nav('/courses')} className="mt-6 rounded-xl border border-stone-200 bg-white px-5 py-3 text-sm font-semibold text-stone-600">← View all courses</button>}
+  </main></div>
+}
 export default Courses;

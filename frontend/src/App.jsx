@@ -15,6 +15,7 @@ import Progress from "./pages/Progress";
 import MaterialQuiz from "./pages/MaterialQuiz";
 import FutureSkills from "./pages/FutureSkills";
 import KarmayogiRedirect from "./pages/KarmayogiRedirect";
+import AuthGuard from "./components/AuthGuard";
 
 function App() {
   return (
@@ -22,19 +23,19 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/assessment" element={<SkillAssessment />} />
-        <Route path="/future-skills" element={<FutureSkills />} />
-        <Route path="/skill-gap" element={<SkillGap />} />
-        <Route path="/recommendations" element={<Recommendations />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/course-quiz" element={<CourseQuiz />} />
-        <Route path="/material-quiz" element={<MaterialQuiz />} />
-        <Route path="/karmayogi" element={<KarmayogiRedirect />} />
-        <Route path="/quiz-result" element={<QuizResult />} />
-        <Route path="/progress" element={<Progress />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
+        <Route path="/assessment" element={<AuthGuard><SkillAssessment /></AuthGuard>} />
+        <Route path="/future-skills" element={<AuthGuard><FutureSkills /></AuthGuard>} />
+        <Route path="/skill-gap" element={<AuthGuard><SkillGap /></AuthGuard>} />
+        <Route path="/recommendations" element={<AuthGuard><Recommendations /></AuthGuard>} />
+        <Route path="/courses" element={<AuthGuard><Courses /></AuthGuard>} />
+        <Route path="/course-quiz" element={<AuthGuard><CourseQuiz /></AuthGuard>} />
+        <Route path="/material-quiz" element={<AuthGuard><MaterialQuiz /></AuthGuard>} />
+        <Route path="/karmayogi" element={<AuthGuard><KarmayogiRedirect /></AuthGuard>} />
+        <Route path="/quiz-result" element={<AuthGuard><QuizResult /></AuthGuard>} />
+        <Route path="/progress" element={<AuthGuard><Progress /></AuthGuard>} />
+        <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
+        <Route path="/admin" element={<AuthGuard><AdminDashboard /></AuthGuard>} />
       </Routes>
     </BrowserRouter>
   );

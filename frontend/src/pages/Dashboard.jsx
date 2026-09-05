@@ -1,12 +1,66 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { getJson } from "../utils/api";
 
 function Dashboard(){
-  const profile=JSON.parse(localStorage.getItem("skillsetuCareerProfile")||localStorage.getItem("skillsetuProfile")||"{}");
-  let gaps=[]; try{gaps=JSON.parse(localStorage.getItem("skillsetuFutureGaps")||"[]")}catch{}
-  if(!gaps.length) gaps=[{name:"Digital Governance & e-Office",current:48,future:82,gap:34},{name:"Data-Driven Decision Making",current:42,future:78,gap:36},{name:"Citizen-Centric Service Delivery",current:58,future:85,gap:27},{name:"Cyber Security Awareness",current:45,future:80,gap:35}];
-  let quiz={score:0,total:0}; try{quiz=JSON.parse(localStorage.getItem("skillsetuQuizResult")||"{}")||quiz}catch{}
-  const avg=Math.round(gaps.reduce((s,g)=>s+(g.current||0),0)/gaps.length); const streak=Number(localStorage.getItem("skillsetuStreak")||7);
+  const [profile, setProfile] = useState({});
+  const [gaps, setGaps] = useState([]);
+  const [quiz, setQuiz] = useState({score: 0, total: 0});
+  const [avg, setAvg] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await getJson('/dashboard/employee');
+        const localProfile = JSON.parse(localStorage.getItem("skillsetuCareerProfile")||localStorage.getItem("skillsetuProfile")||"{}");
+        const mergedProfile = { ...localProfile, ...(res.user || {}), name: res.name || localProfile.name, jobRole: res.jobRole || localProfile.jobRole };
+        setProfile(mergedProfile);
+
+        let mappedGaps = [];
+        if (res.competencyGaps && res.competencyGaps.skillGaps) {
+          mappedGaps = res.competencyGaps.skillGaps.map(g => ({
+            name: g.skill,
+            current: g.currentLevel,
+            future: g.requiredLevel,
+            gap: g.gap
+          }));
+        } else {
+          try{mappedGaps=JSON.parse(localStorage.getItem("skillsetuFutureGaps")||"[]")}catch{}
+          if(!mappedGaps.length) mappedGaps=[{name:"Digital Governance & e-Office",current:48,future:82,gap:34},{name:"Data-Driven Decision Making",current:42,future:78,gap:36},{name:"Citizen-Centric Service Delivery",current:58,future:85,gap:27},{name:"Cyber Security Awareness",current:45,future:80,gap:35}];
+        }
+        setGaps(mappedGaps);
+        setAvg(res.averageScore !== undefined ? res.averageScore : Math.round(mappedGaps.reduce((s,g)=>s+(g.current||0),0)/mappedGaps.length));
+
+        if (res.quizHistory && res.quizHistory.length > 0) {
+          const recent = res.quizHistory[0];
+          setQuiz({ score: recent.score, total: recent.totalQuestions || 5 });
+        } else if (res.recentAttempts && res.recentAttempts.length > 0) {
+          const recent = res.recentAttempts[0];
+          setQuiz({ score: recent.score, total: recent.totalQuestions || 5 });
+        } else {
+          let q={score:0,total:0}; try{q=JSON.parse(localStorage.getItem("skillsetuQuizResult")||"{}")||q}catch{}
+          setQuiz(q);
+        }
+      } catch (err) {
+        console.error("Dashboard fetch failed, using fallback", err);
+        const localProfile = JSON.parse(localStorage.getItem("skillsetuCareerProfile")||localStorage.getItem("skillsetuProfile")||"{}");
+        setProfile(localProfile);
+        let localGaps=[]; try{localGaps=JSON.parse(localStorage.getItem("skillsetuFutureGaps")||"[]")}catch{}
+        if(!localGaps.length) localGaps=[{name:"Digital Governance & e-Office",current:48,future:82,gap:34},{name:"Data-Driven Decision Making",current:42,future:78,gap:36},{name:"Citizen-Centric Service Delivery",current:58,future:85,gap:27},{name:"Cyber Security Awareness",current:45,future:80,gap:35}];
+        setGaps(localGaps);
+        let q={score:0,total:0}; try{q=JSON.parse(localStorage.getItem("skillsetuQuizResult")||"{}")||q}catch{}
+        setQuiz(q);
+        setAvg(Math.round(localGaps.reduce((s,g)=>s+(g.current||0),0)/localGaps.length));
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const streak = Number(localStorage.getItem("skillsetuStreak") || 7);
   const actions=[
     {to:"/future-skills",icon:"◎",title:"Future Skill Gaps",text:"See skills likely to matter for your next role."},
     {to:"/recommendations",icon:"✨",title:"Recommendations",text:"View prioritized iGOT-mapped learning paths."},

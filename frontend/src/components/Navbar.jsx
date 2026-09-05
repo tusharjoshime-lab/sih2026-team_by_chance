@@ -1,4 +1,5 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
+import { clearSession, getAuthToken } from "../utils/api";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -16,15 +17,9 @@ function Navbar() {
   );
 
   const handleLogout = () => {
-  localStorage.removeItem("skillsetuToken");
-  localStorage.removeItem("skillsetuProfile");
-  localStorage.removeItem("skillsetuGovernmentProfile");
-  localStorage.removeItem("skillsetuAssessment");
-  localStorage.removeItem("skillsetuQuizResult");
-  localStorage.removeItem("skillsetuFutureSkills");
-
-  navigate("/");
-};
+    clearSession();
+    navigate("/");
+  };
   return (
     <nav className="sticky top-0 z-50 border-b border-orange-100 bg-[#fffdf9]/95 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">

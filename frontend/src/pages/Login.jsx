@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { postJson, saveAuthSession } from '../utils/api';
 
 function Login() {
   const navigate = useNavigate();
@@ -17,49 +18,9 @@ function Login() {
     setError("");
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.detail || "Invalid email or password"
-        );
-      }
-
-      // Save JWT token
-      localStorage.setItem(
-        "skillsetuToken",
-        data.access_token
-      );
-
-      // Save logged-in user
-      localStorage.setItem(
-        "skillsetuUser",
-        JSON.stringify(data.user)
-      );
-
-      // Dashboard currently reads this profile
-      localStorage.setItem(
-        "skillsetuProfile",
-        JSON.stringify(data.user)
-      );
-
-      // Login successful
-      navigate("/assessment");
-
+      const data = await postJson('/auth/login', { email, password });
+      saveAuthSession(data);
+      navigate('/assessment');
     } catch (err) {
       setError(err.message);
     } finally {

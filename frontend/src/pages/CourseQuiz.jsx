@@ -102,9 +102,10 @@ function CourseQuiz() {
       return;
     }
     const score = content.questions.reduce((sum, question, index) => sum + (nextAnswers[index] === question.correct ? 1 : 0), 0);
-    localStorage.setItem("skillsetuQuizResult", JSON.stringify({ score, total: content.questions.length, courseId: course.id, courseTitle: course.title }));
+    const quizResult = { score, total: content.questions.length, courseId: course.id, courseTitle: course.title, correctCount: score };
+    localStorage.setItem("skillsetuQuizResult", JSON.stringify(quizResult));
     localStorage.setItem("skillsetuStreak", String(Math.max(Number(localStorage.getItem("skillsetuStreak") || 7), 7)));
-    navigate("/quiz-result");
+    navigate("/quiz-result", { state: quizResult });
   };
 
   return (

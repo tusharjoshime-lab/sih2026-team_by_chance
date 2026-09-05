@@ -1,25 +1,58 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-
-const skills = [
-  ["Digital Governance", 68],
-  ["Public Service Delivery", 72],
-  ["Data Literacy", 58],
-  ["Cyber Awareness", 64],
-];
+import { getJson } from "../utils/api";
 
 export default function Progress() {
   const navigate = useNavigate();
-  const result = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem("skillsetuQuizResult")) || { score: 0, total: 5 };
-    } catch {
-      return { score: 0, total: 5 };
+  const [result, setResult] = useState({ score: 0, total: 5 });
+  const [history, setHistory] = useState([]);
+  const [avg, setAvg] = useState(0);
+  const [skills, setSkills] = useState([
+    ["Digital Governance", 68],
+    ["Public Service Delivery", 72],
+    ["Data Literacy", 58],
+    ["Cyber Awareness", 64],
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await getJson('/dashboard/employee');
+        if (res.quizHistory && res.quizHistory.length > 0) {
+          const recent = res.quizHistory[0];
+          setResult({ score: recent.score, total: recent.totalQuestions || 5 });
+          setHistory(res.quizHistory);
+        } else if (res.recentAttempts && res.recentAttempts.length > 0) {
+          const recent = res.recentAttempts[0];
+          setResult({ score: recent.score, total: recent.totalQuestions || 5 });
+          setHistory(res.recentAttempts);
+        }
+        
+        if (res.averageScore !== undefined) {
+          setAvg(res.averageScore);
+        }
+
+        if (res.competencyGaps && res.competencyGaps.skillGaps) {
+          setSkills(res.competencyGaps.skillGaps.map(g => [g.skill, g.currentLevel]));
+        }
+      } catch (err) {
+        console.error(err);
+        try {
+          const resLocal = JSON.parse(localStorage.getItem("skillsetuQuizResult")) || { score: 0, total: 5 };
+          setResult(resLocal);
+        } catch {}
+      } finally {
+        setLoading(false);
+      }
     }
+    fetchData();
   }, []);
 
   const quizPercent = result.total ? Math.round((result.score / result.total) * 100) : 0;
+
+  if (loading) return <div className="min-h-screen bg-[#fffaf3] text-stone-900 flex items-center justify-center">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-[#fffaf3] text-stone-900">

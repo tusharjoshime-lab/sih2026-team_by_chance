@@ -1,7 +1,60 @@
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
+import { getJson } from "../utils/api";
 
 function AdminDashboard() {
-  const departments = [
+  const navigate = useNavigate();
+  const [data, setData] = useState({
+    totalUsers: 136,
+    totalQuizAttempts: 324,
+    orgAverageScore: 70,
+    roleBreakdown: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await getJson('/dashboard/admin');
+        setData({
+          totalUsers: res.totalUsers || 0,
+          totalQuizAttempts: res.totalQuizAttempts || 0,
+          orgAverageScore: res.orgAverageScore || res.averageScore || 0,
+          roleBreakdown: res.roleBreakdown || []
+        });
+      } catch (err) {
+        if (err.status === 403 || (err.message && err.message.includes("403"))) {
+          setError("Not authorized");
+        } else {
+          console.error(err);
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (loading) return <div className="min-h-screen bg-slate-50 text-stone-900 flex items-center justify-center">Loading...</div>;
+
+  if (error === "Not authorized") {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+        <h1 className="text-3xl font-bold text-red-600 mb-4">Not Authorized</h1>
+        <p className="text-stone-600 mb-6">You do not have administrative privileges to view this page.</p>
+        <button onClick={() => navigate('/dashboard')} className="bg-orange-600 text-white px-6 py-2 rounded-xl font-bold">Go to Dashboard</button>
+      </div>
+    );
+  }
+
+  const departments = data.roleBreakdown.length > 0 ? data.roleBreakdown.map((r, i) => ({
+    name: r.jobRole,
+    employees: r.headcount || r.count || 0,
+    score: r.averageReadinessPercent || r.averageReadiness || 0,
+    icon: ["🤝", "📊", "🏛️", "👥"][i % 4]
+  })) : [
     { name: "Citizen Services", employees: 42, score: 74, icon: "🤝" },
     { name: "Data for Governance", employees: 35, score: 68, icon: "📊" },
     { name: "Digital Governance", employees: 28, score: 61, icon: "🏛️" },
@@ -63,7 +116,7 @@ function AdminDashboard() {
                 </p>
 
                 <h3 className="text-4xl font-bold text-slate-900 mt-2">
-                  136
+                  {data.totalUsers}
                 </h3>
               </div>
 
@@ -91,7 +144,7 @@ function AdminDashboard() {
                 </p>
 
                 <h3 className="text-4xl font-bold text-slate-900 mt-2">
-                  70%
+                  {data.orgAverageScore}%
                 </h3>
               </div>
 
@@ -104,7 +157,7 @@ function AdminDashboard() {
             <div className="mt-5 h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full"
-                style={{ width: "70%" }}
+                style={{ width: `${data.orgAverageScore}%` }}
               />
             </div>
 
@@ -150,11 +203,11 @@ function AdminDashboard() {
 
               <div>
                 <p className="text-sm text-stone-500">
-                  Courses Completed
+                  Total Quiz Attempts
                 </p>
 
                 <h3 className="text-4xl font-bold text-slate-900 mt-2">
-                  324
+                  {data.totalQuizAttempts}
                 </h3>
               </div>
 

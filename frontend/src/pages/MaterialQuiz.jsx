@@ -1,170 +1,44 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-
-// Government-focused fallback questions
-// These will be used if Gemini/backend fails or returns unrelated content.
-const fallbackQuestions = [
-  {
-    question:
-      "What is the primary objective of citizen-centric public service delivery?",
-    options: [
-      "To improve accessibility and quality of government services",
-      "To increase paperwork",
-      "To reduce communication with citizens",
-      "To make government procedures more complicated",
-    ],
-    correctAnswer:
-      "To improve accessibility and quality of government services",
-  },
-  {
-    question:
-      "What is one major benefit of digital governance in government departments?",
-    options: [
-      "Faster and more transparent service delivery",
-      "Increasing manual paperwork",
-      "Removing accountability",
-      "Avoiding digital records",
-    ],
-    correctAnswer:
-      "Faster and more transparent service delivery",
-  },
-  {
-    question:
-      "Before making an administrative decision using government data, what should an employee do first?",
-    options: [
-      "Validate the source and accuracy of the data",
-      "Immediately publish the data",
-      "Ignore the time period of the data",
-      "Make a decision based only on assumptions",
-    ],
-    correctAnswer:
-      "Validate the source and accuracy of the data",
-  },
-  {
-    question:
-      "What should a government employee do after receiving a suspicious email asking for official login credentials?",
-    options: [
-      "Verify the request through an official channel and report it if suspicious",
-      "Immediately enter the password",
-      "Forward the password to colleagues",
-      "Disable account security",
-    ],
-    correctAnswer:
-      "Verify the request through an official channel and report it if suspicious",
-  },
-  {
-    question:
-      "Which behaviour best represents ethics and integrity in public administration?",
-    options: [
-      "Taking decisions impartially and in the public interest",
-      "Giving preference to friends or relatives",
-      "Sharing confidential information without permission",
-      "Accepting benefits to influence an official decision",
-    ],
-    correctAnswer:
-      "Taking decisions impartially and in the public interest",
-  },
-];
+import { API_BASE, getAuthToken, postJson } from '../utils/api';
 
 function MaterialQuiz() {
   const navigate = useNavigate();
 
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [answers, setAnswers] = useState({});
+  const [quizId, setQuizId] = useState(null);
 
-  // Check whether questions returned by backend
-  // are relevant to government capacity building.
-  const validateQuestions = (incomingQuestions) => {
-    const combinedText = incomingQuestions
-      .map(
-        (q) =>
-          `${q.question || ""} ${(q.options || []).join(" ")}`
-      )
-      .join(" ")
-      .toLowerCase();
-
-    // Old/generic technical topics we don't want in this demo
-    const blockedGenericTechTerms = [
-      "python",
-      "javascript",
-      "java ",
-      "c++",
-      "programming language",
-      "dataframe",
-      "numpy",
-      "pandas",
-      "react",
-      "node.js",
-      "html",
-      "css",
-    ];
-
-    // Terms expected in government training material
-    const governmentTerms = [
-      "government",
-      "governance",
-      "citizen",
-      "public service",
-      "digital governance",
-      "e-governance",
-      "e-office",
-      "grievance",
-      "administration",
-      "cyber security",
-      "cybersecurity",
-      "ethics",
-      "integrity",
-      "accountability",
-      "department",
-      "official",
-      "public administration",
-      "data-driven",
-      "public interest",
-      "public official",
-      "service delivery",
-    ];
-
-    const looksLikeTechQuiz =
-      blockedGenericTechTerms.some((term) =>
-        combinedText.includes(term)
-      );
-
-    const looksGovernmentRelated =
-      governmentTerms.some((term) =>
-        combinedText.includes(term)
-      );
-
-    return !looksLikeTechQuiz && looksGovernmentRelated;
-  };
 
   const generate = async () => {
     if (!file) return;
 
     setLoading(true);
+    setError(null);
 
     // Reset old quiz state
     setQuestions([]);
     setCurrent(0);
     setSelected(null);
     setAnswers({});
+    setQuizId(null);
 
     try {
       const formData = new FormData();
-
       formData.append("file", file);
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/quiz/generate",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE}/quiz/generate?num_questions=5`, {
+        method: "POST",
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: formData,
+      });
 
       if (!response.ok) {
         throw new Error("AI service unavailable");
@@ -179,55 +53,20 @@ function MaterialQuiz() {
         throw new Error("No questions returned");
       }
 
-      // Only take first 5 questions
-      const incomingQuestions =
-        data.questions.slice(0, 5);
-
-      // Validate question structure
-      const validStructure = incomingQuestions.every(
-        (q) =>
-          q.question &&
-          Array.isArray(q.options) &&
-          q.options.length >= 2 &&
-          q.correctAnswer
-      );
-
-      if (!validStructure) {
-        throw new Error("Invalid quiz format");
-      }
-
-      // Check whether backend returned
-      // government-related questions
-      const isGovernmentQuiz =
-        validateQuestions(incomingQuestions);
-
-      if (isGovernmentQuiz) {
-        // Real Gemini/backend questions
-        setQuestions(incomingQuestions);
-      } else {
-        // Backend returned unrelated questions
-        // Use government-safe demo questions
-        setQuestions(fallbackQuestions);
-      }
-    } catch (error) {
+      setQuestions(data.questions);
+      setQuizId(data.quizId);
+    } catch (err) {
       console.error(
         "Quiz generation error:",
-        error
+        err
       );
-
-      // Small delay so demo still feels natural
-      await new Promise((resolve) =>
-        setTimeout(resolve, 700)
-      );
-
-      // Backend/Gemini failed → safe government quiz
-      setQuestions(fallbackQuestions);
+      setError(err.message || "Failed to generate quiz.");
     } finally {
       setLoading(false);
     }
   };
 
-  const submitAnswer = () => {
+  const submitAnswer = async () => {
     if (selected === null) return;
 
     const nextAnswers = {
@@ -244,40 +83,26 @@ function MaterialQuiz() {
       return;
     }
 
-    // Calculate final score
-    const score = questions.reduce(
-      (sum, question, index) => {
-        const selectedIndex =
-          nextAnswers[index];
+    setLoading(true);
+    setError(null);
 
-        const chosenAnswer =
-          question.options?.[selectedIndex];
+    try {
+      const answersArray = questions.map((q, idx) => {
+        const selectedIdx = nextAnswers[idx];
+        return q.options[selectedIdx];
+      });
 
-        return (
-          sum +
-          (chosenAnswer ===
-          question.correctAnswer
-            ? 1
-            : 0)
-        );
-      },
-      0
-    );
+      const result = await postJson("/quiz/submit", {
+        quizId,
+        answers: answersArray,
+      });
 
-    // Save result
-    localStorage.setItem(
-      "skillsetuQuizResult",
-      JSON.stringify({
-        score,
-        total: questions.length,
-        courseId: "material-ai",
-        courseTitle: `AI Quiz: ${
-          file?.name || "Uploaded Material"
-        }`,
-      })
-    );
-
-    navigate("/quiz-result");
+      navigate("/quiz-result", { state: result });
+    } catch (err) {
+      console.error("Submit error:", err);
+      setError("Failed to submit quiz.");
+      setLoading(false);
+    }
   };
 
   const resetQuiz = () => {
@@ -285,7 +110,9 @@ function MaterialQuiz() {
     setCurrent(0);
     setSelected(null);
     setAnswers({});
+    setQuizId(null);
     setFile(null);
+    setError(null);
   };
 
   const accept = ".pdf,.pptx,.docx";
@@ -369,6 +196,12 @@ function MaterialQuiz() {
                 </div>
               )}
             </div>
+
+            {error && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
             <button
               onClick={generate}
@@ -469,13 +302,13 @@ function MaterialQuiz() {
 
               <button
                 onClick={submitAnswer}
-                disabled={selected === null}
+                disabled={selected === null || loading}
                 className="rounded-xl bg-orange-600 px-6 py-3 font-bold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {current ===
+                {loading ? "Submitting..." : (current ===
                 questions.length - 1
                   ? "Submit Quiz →"
-                  : "Next →"}
+                  : "Next →")}
               </button>
 
               <button

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { putJson } from "../utils/api";
 import Navbar from "../components/Navbar";
 
 const questions = [
@@ -124,7 +125,7 @@ function SkillAssessment() {
   const item = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (selected === null) return;
 
     const nextResponses = { ...responses, [currentQuestion]: selected };
@@ -156,6 +157,13 @@ function SkillAssessment() {
 
     localStorage.setItem("skillsetuAssessment", JSON.stringify(assessment));
     localStorage.setItem("skillsetuAssessmentResponses", JSON.stringify(nextResponses));
+
+    try {
+      await putJson('/profile', { competencyScores: assessment });
+    } catch (err) {
+      console.error('Failed to sync scores to backend:', err);
+    }
+
     navigate("/skill-gap");
   };
 

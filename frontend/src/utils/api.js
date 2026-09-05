@@ -120,6 +120,46 @@ export const saveProfileToBackend = async (profilePayload) => {
   return response;
 };
 
+export const postFormData = async (path, formData) => {
+  const token = getAuthToken();
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+
+  const payload = contentType.includes("application/json")
+    ? await response.json().catch(() => null)
+    : await response.text().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.detail ||
+        payload?.message ||
+        payload ||
+        response.statusText ||
+        "Request failed"
+    );
+  }
+
+  return payload;
+};
+
+export const clearSession = () => {
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("skillsetu")) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach((key) => localStorage.removeItem(key));
+};
+
 export default {
   API_BASE,
   API_BASE_URL,
@@ -132,4 +172,6 @@ export default {
   putJson,
   getJson,
   saveProfileToBackend,
+  postFormData,
+  clearSession,
 };
