@@ -60,3 +60,12 @@ class ProfileUpdate(BaseModel):
     experience: Optional[List[ExperienceItem]] = None
     previousTrainings: Optional[List[TrainingItem]] = None
     competencyScores: Optional[Dict[str, float]] = None
+
+
+class QuizSubmitRequest(BaseModel):
+    quizId: str
+    answers: List[Optional[str]]
+
+
+class ChatRequest(BaseModel):
+    message: str

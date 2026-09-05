@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, status
 from pymongo.errors import DuplicateKeyError
 
@@ -24,7 +24,8 @@ def register(payload: UserRegister):
         "experience": [],
         "previousTrainings": [],
         "competencyScores": {},
-        "createdAt": datetime.utcnow(),
+        "isAdmin": False,
+        "createdAt": datetime.now(timezone.utc),
     }
 
     try:

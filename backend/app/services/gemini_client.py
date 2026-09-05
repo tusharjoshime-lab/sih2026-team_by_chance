@@ -36,3 +36,19 @@ def generate_json(prompt: str):
         return json.loads(response.text)
     except (json.JSONDecodeError, TypeError, AttributeError) as exc:
         raise RuntimeError(f"Gemini did not return valid JSON: {exc}")
+
+
+def generate_text(prompt: str) -> str:
+    """Same as generate_json, but for plain conversational replies (no JSON mode)."""
+    if _client is None:
+        raise RuntimeError("GEMINI_API_KEY is not set in .env")
+
+    try:
+        response = _client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+    except Exception as exc:
+        raise RuntimeError(f"Gemini API request failed: {exc}")
+
+    if not getattr(response, "text", None):
+        raise RuntimeError("Gemini returned an empty response")
+
+    return response.text
