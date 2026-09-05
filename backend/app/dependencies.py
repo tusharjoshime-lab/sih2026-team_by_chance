@@ -34,3 +34,10 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
     return user
+
+
+def require_admin(current_user: dict = Depends(get_current_user)) -> dict:
+    """Gate for /dashboard/admin. See make_admin.py to grant this to a user."""
+    if not current_user.get("isAdmin", False):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return current_user

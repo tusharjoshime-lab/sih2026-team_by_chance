@@ -7,3 +7,10 @@ bcrypt
 pydantic
 email-validator
 google-genai
+python-multipart
+pdfplumber
+python-pptx
+python-docx
+pytest
+httpx
+mongomock
